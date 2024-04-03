@@ -37,8 +37,6 @@ class Spaceship(pg.sprite.Sprite):
         direction = math.copysign(1, direction)
         # If the spaceship is not moving, do nothing
         if self.velocity.magnitude == 0: return
-        # If spaceship is going backwards, reverse the direction
-        elif self.velocity.magnitude < 0: direction = -direction
         
         # Rotate the object to an amount corresponding with its speed
         self.velocity.direction += direction * self.velocity.magnitude * ROTATE_SPEED
