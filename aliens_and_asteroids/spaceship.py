@@ -1,5 +1,6 @@
 import math
 import pygame as pg
+from aliens_and_asteroids import geometry
 
 FORWARD_ACCELERATION = 0.08
 FORWARD_MAX_SPEED = 4.1
@@ -17,8 +18,8 @@ class Spaceship(pg.sprite.Sprite):
         super().__init__(groups)
         self.area = pg.display.get_surface()
         
-        self.pos = Position(pos[0], pos[1])
-        self.velocity = Vector(0, direction)
+        self.pos = geometry.Position(pos[0], pos[1])
+        self.velocity = geometry.Vector(0, direction)
         
         self.images = [pg.transform.rotate(image, -90.0) for image in self.images]
         self.image = pg.transform.rotate(self.images[0], -self.velocity.direction)
@@ -58,42 +59,12 @@ class Spaceship(pg.sprite.Sprite):
         a, b = self.velocity.ab()
         self.pos.x += a
         self.pos.y += b
-        if self.area.get_rect().collidepoint(self.pos.xy()):
-            self.rect.center = self.pos.xy()
         # Move the spaceship to the opposite side if out of bounds
-        else:
+        if not self.area.get_rect().collidepoint(self.pos.xy()):
             if self.pos.x > self.area.get_width(): self.pos.x = 0
             elif self.pos.x < 0: self.pos.x = self.area.get_width()
             if self.pos.y > self.area.get_height(): self.pos.y = 0
             elif self.pos.y < 0: self.pos.y = self.area.get_height()
         
-class Vector():
-    """A quantity that has a magnitude and direction"""
-    
-    def __init__(self, magnitude, direction):
-        """Initializes a vector with a magnitude and position."""
-        self.magnitude = magnitude
-        self.direction = direction
-        
-    def ab(self, value=None):
-        """Alters the terminal position if a parameter is passed.
-        Otherwise, returns the terminal position"""
-        if value is None:
-            a = math.cos(math.radians(self.direction)) * self.magnitude
-            b = math.sin(math.radians(self.direction)) * self.magnitude
-            return a, b
-        else:
-            self.magnitude = math.sqrt(self.a**2 + self.b**2)
-            self.direction = math.degrees(math.atan(self.b / self.a))
-            
-class Position():
-    """An ordinal pair that represents the location of an object in space"""
-    
-    def __init__(self, x, y):
-        """Initializes a position with an x- and y-coordinate."""
-        self.x = x
-        self.y = y
-        
-    def xy(self):
-        """Returns the x- and y-coordinates as a tuple."""
-        return self.x, self.y
+        # Position the spaceship's rectangle on the screen
+        self.rect.center = self.pos.xy()
