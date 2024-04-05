@@ -9,6 +9,26 @@ class Direction(Enum):
     UP = 2
     LEFT = 3
     DOWN = 4
+    
+    def opposite(self):
+        """Returns the opposite direction."""
+        lookup = {
+            Direction.RIGHT: Direction.LEFT,
+            Direction.LEFT: Direction.RIGHT,
+            Direction.UP: Direction.DOWN,
+            Direction.DOWN: Direction.UP,
+            }
+        return lookup[self]
+    
+    def angle(self):
+        """Returns the opposite direction."""
+        lookup = {
+            Direction.RIGHT: 0,
+            Direction.UP: 90,
+            Direction.LEFT: 180,
+            Direction.DOWN: 270,
+            }
+        return lookup[self]
         
 class Vector():
     """A quantity that has a magnitude and direction"""
