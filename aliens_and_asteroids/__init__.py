@@ -10,13 +10,15 @@ from pygame.locals import *
 from aliens_and_asteroids import spaceship, obstacle
 #from click.decorators import group
 
+ICON = 'alien_a1.gif'
 SCREENRECT = pg.Rect(0, 0, 640, 480)
 SCREEN_WIDTH, SCREEN_HEIGHT = SCREENRECT.size
 FPS = 60
 SPAWN_RATE = 2 #s
 GAME_OVER_SCREEN_COLOR = '#26144d'
-GAME_OVER_TEXT_COLOR = 'white'
+TEXT_COLOR = 'white'
 GAME_OVER_TEXT = 'GAME OVER'
+GAME_OVER_IMAGE = 'spaceship.gif'
 PLAY_AGAIN_PROMPT_TEXT = 'Press SPACE to play again.'
 SCORE_TEXT = 'Your score is {}'
 
@@ -42,7 +44,7 @@ def new_game():
     
 
 def main():
-    global screen, background
+    global screen, background, score
     # Initialize pygame
     pg.init()
     pg.mixer.init()
@@ -50,6 +52,7 @@ def main():
     # Set up the game window
     screen = pg.display.set_mode(SCREENRECT.size)
     pg.display.set_caption('Aliens and Asteroids')
+    pg.display.set_icon(load_image(ICON))
     
     # Load images and assign them to sprite classes
     spaceship.Spaceship.images = [load_image('spaceship.gif')]
@@ -72,12 +75,13 @@ def main():
     title_font = load_font('PixelifySans.ttf', 48)
     title_font.bold = True
     subtitle_font = load_font('PixelifySans.ttf', 26)
-    gameover_message = title_font.render(GAME_OVER_TEXT, True, GAME_OVER_TEXT_COLOR)
+    score_font = load_font('PixelifySans.ttf', 24)
+    gameover_message = title_font.render(GAME_OVER_TEXT, True, TEXT_COLOR)
     gameover_rect = gameover_message.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 5))
-    spaceship_image = load_image('spaceship.gif')
+    spaceship_image = load_image(GAME_OVER_IMAGE)
     spaceship_image = pg.transform.scale_by(spaceship_image, 3)
     spaceship_rect = spaceship_image.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT * 9 / 16))
-    playagain_message = subtitle_font.render(PLAY_AGAIN_PROMPT_TEXT, True, GAME_OVER_TEXT_COLOR)
+    playagain_message = subtitle_font.render(PLAY_AGAIN_PROMPT_TEXT, True, TEXT_COLOR)
     playagain_rect = playagain_message.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT * 4 / 5))
     
     # Start first game
@@ -124,11 +128,19 @@ def main():
                     clazz(sprites, asteroids)
                     
                 next_spawn_time_left = SPAWN_RATE
+                
+            # Display background
+            screen.blit(background, (0, 0))
             
             # Update sprites
             sprites.clear(screen, background)
             sprites.update()
             sprites.draw(screen)
+    
+            # Display score
+            score_message = score_font.render(str(score), True, TEXT_COLOR)
+            score_rect = score_message.get_rect(center=(SCREEN_WIDTH / 2, score_message.get_height()))
+            screen.blit(score_message, score_rect)
             
             # Detect collisions between aliens/asteroids and player
             # If collision is detected, kill player
@@ -137,7 +149,8 @@ def main():
             
             # Detect collisions between aliens/asteroids and laser
             # If collision is detected, kill obstacle and remove laser
-            pg.sprite.groupcollide(aliens, lasers, True, True)
+            for alien in pg.sprite.groupcollide(aliens, lasers, True, True):
+                score += alien.points
             for asteroid, laser_list in pg.sprite.groupcollide(asteroids, lasers, False, False).items():
                 laser = laser_list[0]
                 if issubclass(asteroid.__class__, obstacle.AsteroidM) or issubclass(asteroid.__class__, obstacle.AsteroidL):
@@ -145,13 +158,14 @@ def main():
                 else:
                     asteroid.kill()
                 laser.kill()
+                score += asteroid.points
             
             # Count down the spawn timer
             next_spawn_time_left -= 1 / FPS
             
         # If the player is not alive, display the game over screen
         else:
-            score_message = subtitle_font.render(SCORE_TEXT.format(score), True, GAME_OVER_TEXT_COLOR)
+            score_message = subtitle_font.render(SCORE_TEXT.format(score), True, TEXT_COLOR)
             score_rect = score_message.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT * 5 / 16))
             
             screen.fill(GAME_OVER_SCREEN_COLOR)

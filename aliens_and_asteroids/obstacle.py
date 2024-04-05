@@ -12,6 +12,9 @@ ALIEN_C_SPEED = 2.6
 ALIEN_A_DESCEND_DISTANCE = 50
 ALIEN_B_MIN_MOVE_DISTANCE = 40
 ALIEN_B_MAX_MOVE_DISTANCE = 240
+ALIEN_A_POINTS = 1
+ALIEN_B_POINTS = 3
+ALIEN_C_POINTS = 5
 
 # Asteroid constants
 ASTEROID_SPEED_RANGE = 1
@@ -20,6 +23,7 @@ ASTEROID_M_SPEED = 2
 ASTEROID_L_SPEED = 1.5
 ASTEROID_MAX_ROTATE_ANGLE = 7.5
 NUM_PIECES = 3 # Number of broken asteroid pieces M and L split into
+ASTEROID_POINTS = 1
 
 class Obstacle(pg.sprite.Sprite):
     """Abstract class for any obstacle"""
@@ -94,6 +98,7 @@ class AlienA(Alien):
     def __init__(self, *groups):
         super().__init__(groups)
         self.speed = ALIEN_A_SPEED
+        self.points = ALIEN_A_POINTS
         
         # Starting position is one of the eight positions adjacent to corners
         screen_width = self.area.get_width()
@@ -175,6 +180,7 @@ class AlienB(Alien):
     def __init__(self, *groups):
         super().__init__(groups)
         self.speed = ALIEN_B_SPEED
+        self.points = ALIEN_B_POINTS
         
         # Set first target to just come on screen
         self.direction = self.offscreen_position.opposite()
@@ -223,6 +229,7 @@ class AlienC(Alien):
     def __init__(self, player, *groups):
         super().__init__(groups)
         self.speed = ALIEN_C_SPEED
+        self.points = ALIEN_C_POINTS
         self.player = player
     
     def move(self):
@@ -264,6 +271,9 @@ class Asteroid(Obstacle):
 
     def __init__(self, *groups):
         super().__init__(groups)
+        self.points = ASTEROID_POINTS
+        
+        # Calculate the angles between asteroid and points
         raypoints = []
         if self.offscreen_position == UP:
             raypoints.append(geometry.Position(1, 1))
@@ -277,8 +287,6 @@ class Asteroid(Obstacle):
         elif self.offscreen_position == LEFT:
             raypoints.append(geometry.Position(1, self.area.get_height() - 1))
             raypoints.append(geometry.Position(1, 1))
-        
-        # Calculate the angles between asteroid and points
         rays = []
         for i in range(len(raypoints)):
             delta_x = raypoints[i].x - self.pos.x
