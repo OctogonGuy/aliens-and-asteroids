@@ -41,18 +41,21 @@ def main():
     screen.blit(background, (0, 0))
     
     # Initialize game groups
+    aliens = pg.sprite.Group()
+    asteroids = pg.sprite.Group()
     sprites = pg.sprite.RenderUpdates()
+    playergroup = pg.sprite.GroupSingle()
     
     # Initialize some starting values
     screen_width, screen_height = SCREENRECT.size
     spaceship.Spaceship.area = screen;
-    player = spaceship.Spaceship((screen_width / 2, screen_height / 2), -90.0, sprites)
+    player = spaceship.Spaceship((screen_width / 2, screen_height / 2), -90.0, sprites, playergroup)
     
     # Run the main loop
     clock = pg.time.Clock()
     next_spawn_time_left = 0
     running = True
-    while running:
+    while running and player.alive():
         for event in pg.event.get():
             if event.type == QUIT:
                 running = False
@@ -76,9 +79,9 @@ def main():
             )
             clazz = random.choice(obstacles)
             if issubclass(clazz, alien.Alien):
-                clazz(player, sprites)
+                clazz(player, sprites, aliens)
             else:
-                clazz(sprites)
+                clazz(sprites, asteroids)
                 
             next_spawn_time_left = SPAWN_RATE
         
@@ -88,6 +91,11 @@ def main():
         sprites.draw(screen)
         pg.display.update()
         clock.tick(FPS)
+        
+        # Detect collisions between aliens/asteroids and player
+        # If collision is detected, kill player
+        pg.sprite.groupcollide(aliens, playergroup, False, True)
+        pg.sprite.groupcollide(asteroids, playergroup, False, True)
         
         # Count down the spawn timer
         next_spawn_time_left -= 1 / FPS
