@@ -8,6 +8,7 @@ BACKWARD_ACCELERATION = 0.06
 BACKWARD_MAX_SPEED = 1.6
 ROTATE_SPEED = 0.6
 AIR_RESISTANCE = 0.02
+LASER_SPEED = 10
 
 class Spaceship(pg.sprite.Sprite):
     """A spaceship that can move and shoot"""
@@ -45,6 +46,10 @@ class Spaceship(pg.sprite.Sprite):
         # Rotate the image
         self.image = pg.transform.rotate(self.images[0], -self.velocity.direction)
         self.rect = self.image.get_rect(center=self.rect.center)
+        
+    def shoot(self, *groups):
+        """Shoots a laser from the front of she spaceship."""
+        Laser(self, groups)
     
     def update(self):
         """Updates the position of the spaceship."""
@@ -67,4 +72,30 @@ class Spaceship(pg.sprite.Sprite):
             elif self.pos.y < 0: self.pos.y = self.area.get_height()
         
         # Position the spaceship's rectangle on the screen
+        self.rect.center = self.pos.xy()
+
+
+class Laser(pg.sprite.Sprite):
+    
+    images = []
+    
+    def __init__(self, spaceship, *groups):
+        super().__init__(groups)
+        self.area = pg.display.get_surface()
+        
+        self.angle = math.radians(spaceship.velocity.direction)
+        self.pos = geometry.Position(spaceship.pos.x, spaceship.pos.y)
+        self.pos.x += math.cos(self.angle) * (spaceship.image.get_height() / 2)
+        self.pos.y += math.sin(self.angle) * (spaceship.image.get_height() / 2)
+        
+        self.images = [pg.transform.rotate(image, -90.0) for image in self.images]
+        self.image = pg.transform.rotate(self.images[0], -spaceship.velocity.direction)
+        self.rect = self.image.get_rect(center=self.pos.xy())
+        
+    def update(self):
+        """Moves the laser forward."""
+        self.pos.x += math.cos(self.angle) * LASER_SPEED
+        self.pos.y += math.sin(self.angle) * LASER_SPEED
+        
+        # Position the laser's rectangle on the screen
         self.rect.center = self.pos.xy()

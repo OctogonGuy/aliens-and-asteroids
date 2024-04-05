@@ -25,6 +25,7 @@ def main():
     
     # Load images and assign them to sprite classes
     spaceship.Spaceship.images = [load_image('spaceship.gif')]
+    spaceship.Laser.images = [load_image('laser.gif')]
     obstacle.AlienA.images = [load_image('alien_a1.gif')]
     obstacle.AlienB.images = [load_image('alien_b1.gif')]
     obstacle.AlienC.images = [load_image('alien_c1.gif')]
@@ -43,6 +44,7 @@ def main():
     # Initialize game groups
     aliens = pg.sprite.Group()
     asteroids = pg.sprite.Group()
+    lasers = pg.sprite.Group()
     sprites = pg.sprite.RenderUpdates()
     playergroup = pg.sprite.GroupSingle()
     
@@ -59,6 +61,10 @@ def main():
         for event in pg.event.get():
             if event.type == QUIT:
                 running = False
+            
+            # Handle shooting
+            if event.type == KEYDOWN and event.key == K_SPACE:
+                player.shoot(sprites, lasers)
                 
         # Handle player movement
         keystate = pg.key.get_pressed()
@@ -98,6 +104,11 @@ def main():
         # If collision is detected, kill player
         pg.sprite.groupcollide(aliens, playergroup, False, True)
         pg.sprite.groupcollide(asteroids, playergroup, False, True)
+        
+        # Detect collisions between aliens/asteroids and laser
+        # If collision is detected, kill obstacle and remove laser
+        pg.sprite.groupcollide(aliens, lasers, True, True)
+        pg.sprite.groupcollide(asteroids, lasers, True, True)
         
         # Count down the spawn timer
         next_spawn_time_left -= 1 / FPS
