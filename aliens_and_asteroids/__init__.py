@@ -7,8 +7,8 @@ import os
 import random
 import pygame as pg
 from pygame.locals import *
-from aliens_and_asteroids import spaceship, alien, asteroid
-from click.decorators import group
+from aliens_and_asteroids import spaceship, obstacle
+#from click.decorators import group
 
 SCREENRECT = pg.Rect(0, 0, 640, 480)
 FPS = 60
@@ -25,12 +25,12 @@ def main():
     
     # Load images and assign them to sprite classes
     spaceship.Spaceship.images = [load_image('spaceship.gif')]
-    alien.AlienA.images = [load_image('alien_a1.gif')]
-    alien.AlienB.images = [load_image('alien_b1.gif')]
-    alien.AlienC.images = [load_image('alien_c1.gif')]
-    asteroid.AsteroidS.images = [load_image('asteroid_s.gif')]
-    asteroid.AsteroidM.images = [load_image('asteroid_m.gif')]
-    asteroid.AsteroidL.images = [load_image('asteroid_l.gif')]
+    obstacle.AlienA.images = [load_image('alien_a1.gif')]
+    obstacle.AlienB.images = [load_image('alien_b1.gif')]
+    obstacle.AlienC.images = [load_image('alien_c1.gif')]
+    obstacle.AsteroidS.images = [load_image('asteroid_s.gif')]
+    obstacle.AsteroidM.images = [load_image('asteroid_m.gif')]
+    obstacle.AsteroidL.images = [load_image('asteroid_l.gif')]
     
     # Create the background and tile the background image
     bgtile = load_image('background.gif')
@@ -74,12 +74,14 @@ def main():
         # If spawn timer is up, spawn next enemy/obstacle
         if next_spawn_time_left <= 0:
             obstacles = (
-                alien.AlienA, alien.AlienB, alien.AlienC,
-                asteroid.AsteroidS, asteroid.AsteroidM, asteroid.AsteroidL
+                obstacle.AlienA, obstacle.AlienB, obstacle.AlienC,
+                obstacle.AsteroidS, obstacle.AsteroidM, obstacle.AsteroidL
             )
             clazz = random.choice(obstacles)
-            if issubclass(clazz, alien.Alien):
+            if issubclass(clazz, obstacle.AlienC):
                 clazz(player, sprites, aliens)
+            elif issubclass(clazz, obstacle.Alien):
+                clazz(sprites, aliens)
             else:
                 clazz(sprites, asteroids)
                 
