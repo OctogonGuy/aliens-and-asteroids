@@ -11,10 +11,38 @@ from aliens_and_asteroids import spaceship, obstacle
 #from click.decorators import group
 
 SCREENRECT = pg.Rect(0, 0, 640, 480)
+SCREEN_WIDTH, SCREEN_HEIGHT = SCREENRECT.size
 FPS = 60
 SPAWN_RATE = 2 #s
+GAME_OVER_SCREEN_COLOR = '#26144d'
+GAME_OVER_TEXT_COLOR = 'white'
+GAME_OVER_TEXT = 'GAME OVER'
+PLAY_AGAIN_PROMPT_TEXT = 'Press SPACE to play again.'
+SCORE_TEXT = 'Your score is {}'
+
+def new_game():
+    """Starts a new game."""
+    global aliens, asteroids, lasers, sprites, playergroup, player, score
+    
+    # Initialize score
+    score = 0
+    
+    # Initialize game groups
+    aliens = pg.sprite.Group()
+    asteroids = pg.sprite.Group()
+    lasers = pg.sprite.Group()
+    sprites = pg.sprite.RenderUpdates()
+    playergroup = pg.sprite.GroupSingle()
+    
+    # Create player
+    player = spaceship.Spaceship((SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2), -90.0, sprites, playergroup)
+    
+    # Show background
+    screen.blit(background, (0, 0))
+    
 
 def main():
+    global screen, background
     # Initialize pygame
     pg.init()
     pg.mixer.init()
@@ -39,85 +67,110 @@ def main():
     for x in range(0, SCREENRECT.width, bgtile.get_width()):
         for y in range(0, SCREENRECT.height, bgtile.get_height()):
             background.blit(bgtile, (x, y))
-    screen.blit(background, (0, 0))
-    
-    # Initialize game groups
-    aliens = pg.sprite.Group()
-    asteroids = pg.sprite.Group()
-    lasers = pg.sprite.Group()
-    sprites = pg.sprite.RenderUpdates()
-    playergroup = pg.sprite.GroupSingle()
     
     # Initialize some starting values
-    screen_width, screen_height = SCREENRECT.size
-    spaceship.Spaceship.area = screen;
-    player = spaceship.Spaceship((screen_width / 2, screen_height / 2), -90.0, sprites, playergroup)
+    title_font = load_font('PixelifySans.ttf', 48)
+    title_font.bold = True
+    subtitle_font = load_font('PixelifySans.ttf', 26)
+    gameover_message = title_font.render(GAME_OVER_TEXT, True, GAME_OVER_TEXT_COLOR)
+    gameover_rect = gameover_message.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 5))
+    spaceship_image = load_image('spaceship.gif')
+    spaceship_image = pg.transform.scale_by(spaceship_image, 3)
+    spaceship_rect = spaceship_image.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT * 9 / 16))
+    playagain_message = subtitle_font.render(PLAY_AGAIN_PROMPT_TEXT, True, GAME_OVER_TEXT_COLOR)
+    playagain_rect = playagain_message.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT * 4 / 5))
+    
+    # Start first game
+    new_game()
     
     # Run the main loop
     clock = pg.time.Clock()
     next_spawn_time_left = 0
     running = True
-    while running and player.alive():
-        for event in pg.event.get():
-            if event.type == QUIT:
-                running = False
-            
-            # Handle shooting
-            if event.type == KEYDOWN and event.key == K_SPACE:
-                player.shoot(sprites, lasers)
+    while running:
+        # If the player is still alive, run the game
+        if player.alive():
+            for event in pg.event.get():
+                if event.type == QUIT:
+                    running = False
                 
-        # Handle player movement
-        keystate = pg.key.get_pressed()
-        move_direction = keystate[K_UP] - keystate[K_DOWN]
-        if move_direction > 0:
-            player.forward()
-        elif move_direction < 0:
-            player.backward()
-        direction = keystate[K_RIGHT] - keystate[K_LEFT]
-        if direction != 0:
-            player.rotate(direction)
-            
-        # If spawn timer is up, spawn next enemy/obstacle
-        if next_spawn_time_left <= 0:
-            obstacles = (
-                #obstacle.AlienA, obstacle.AlienB, obstacle.AlienC,
-                obstacle.AsteroidL,
-            )
-            clazz = random.choice(obstacles)
-            if issubclass(clazz, obstacle.AlienC):
-                clazz(player, sprites, aliens)
-            elif issubclass(clazz, obstacle.Alien):
-                clazz(sprites, aliens)
-            else:
-                clazz(sprites, asteroids)
+                # Handle shooting
+                if event.type == KEYDOWN and event.key == K_SPACE:
+                    player.shoot(sprites, lasers)
+                    
+            # Handle player movement
+            keystate = pg.key.get_pressed()
+            move_direction = keystate[K_UP] - keystate[K_DOWN]
+            if move_direction > 0:
+                player.forward()
+            elif move_direction < 0:
+                player.backward()
+            direction = keystate[K_RIGHT] - keystate[K_LEFT]
+            if direction != 0:
+                player.rotate(direction)
                 
-            next_spawn_time_left = SPAWN_RATE
+            # If spawn timer is up, spawn next enemy/obstacle
+            if next_spawn_time_left <= 0:
+                obstacles = (
+                    obstacle.AlienA, obstacle.AlienB, obstacle.AlienC,
+                    obstacle.AsteroidS, obstacle.AsteroidM, obstacle.AsteroidL
+                )
+                clazz = random.choice(obstacles)
+                if issubclass(clazz, obstacle.AlienC):
+                    clazz(player, sprites, aliens)
+                elif issubclass(clazz, obstacle.Alien):
+                    clazz(sprites, aliens)
+                else:
+                    clazz(sprites, asteroids)
+                    
+                next_spawn_time_left = SPAWN_RATE
+            
+            # Update sprites
+            sprites.clear(screen, background)
+            sprites.update()
+            sprites.draw(screen)
+            
+            # Detect collisions between aliens/asteroids and player
+            # If collision is detected, kill player
+            pg.sprite.groupcollide(aliens, playergroup, False, True)
+            pg.sprite.groupcollide(asteroids, playergroup, False, True)
+            
+            # Detect collisions between aliens/asteroids and laser
+            # If collision is detected, kill obstacle and remove laser
+            pg.sprite.groupcollide(aliens, lasers, True, True)
+            for asteroid, laser_list in pg.sprite.groupcollide(asteroids, lasers, False, False).items():
+                laser = laser_list[0]
+                if issubclass(asteroid.__class__, obstacle.AsteroidM) or issubclass(asteroid.__class__, obstacle.AsteroidL):
+                    asteroid.kill(laser.angle)
+                else:
+                    asteroid.kill()
+                laser.kill()
+            
+            # Count down the spawn timer
+            next_spawn_time_left -= 1 / FPS
+            
+        # If the player is not alive, display the game over screen
+        else:
+            score_message = subtitle_font.render(SCORE_TEXT.format(score), True, GAME_OVER_TEXT_COLOR)
+            score_rect = score_message.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT * 5 / 16))
+            
+            screen.fill(GAME_OVER_SCREEN_COLOR)
+            screen.blit(gameover_message, gameover_rect)
+            screen.blit(playagain_message, playagain_rect)
+            screen.blit(spaceship_image, spaceship_rect)
+            screen.blit(score_message, score_rect)
+            
+            for event in pg.event.get():
+                if event.type == QUIT:
+                    running = False
+                
+                # Handle starting new game
+                if event.type == KEYDOWN and event.key == K_SPACE:
+                    new_game()
         
         # Update display and advance frame
-        sprites.clear(screen, background)
-        sprites.update()
-        sprites.draw(screen)
         pg.display.update()
         clock.tick(FPS)
-        
-        # Detect collisions between aliens/asteroids and player
-        # If collision is detected, kill player
-        pg.sprite.groupcollide(aliens, playergroup, False, True)
-        pg.sprite.groupcollide(asteroids, playergroup, False, True)
-        
-        # Detect collisions between aliens/asteroids and laser
-        # If collision is detected, kill obstacle and remove laser
-        pg.sprite.groupcollide(aliens, lasers, True, True)
-        for asteroid, laser_list in pg.sprite.groupcollide(asteroids, lasers, False, False).items():
-            laser = laser_list[0]
-            if issubclass(asteroid.__class__, obstacle.AsteroidM) or issubclass(asteroid.__class__, obstacle.AsteroidL):
-                asteroid.kill(laser.angle)
-            else:
-                asteroid.kill()
-            laser.kill()
-        
-        # Count down the spawn timer
-        next_spawn_time_left -= 1 / FPS
         
     # Quit pygame
     pg.mixer.quit()
@@ -132,6 +185,12 @@ def load_image(filename):
     except pg.error:
         raise SystemExit(f'Could not load image "{file}" {pg.get_error()}')
     return surface.convert()
+
+def load_font(filename, size):
+    """Loads a font file."""
+    main_dir = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
+    file = os.path.join(main_dir, 'data', filename)
+    return pg.font.Font(file, size)
 
 if __name__ == '__main__':
     main()
