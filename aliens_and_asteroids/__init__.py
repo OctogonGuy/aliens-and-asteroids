@@ -80,8 +80,8 @@ def main():
         # If spawn timer is up, spawn next enemy/obstacle
         if next_spawn_time_left <= 0:
             obstacles = (
-                obstacle.AlienA, obstacle.AlienB, obstacle.AlienC,
-                obstacle.AsteroidS, obstacle.AsteroidM, obstacle.AsteroidL
+                #obstacle.AlienA, obstacle.AlienB, obstacle.AlienC,
+                obstacle.AsteroidL,
             )
             clazz = random.choice(obstacles)
             if issubclass(clazz, obstacle.AlienC):
@@ -108,7 +108,13 @@ def main():
         # Detect collisions between aliens/asteroids and laser
         # If collision is detected, kill obstacle and remove laser
         pg.sprite.groupcollide(aliens, lasers, True, True)
-        pg.sprite.groupcollide(asteroids, lasers, True, True)
+        for asteroid, laser_list in pg.sprite.groupcollide(asteroids, lasers, False, False).items():
+            laser = laser_list[0]
+            if issubclass(asteroid.__class__, obstacle.AsteroidM) or issubclass(asteroid.__class__, obstacle.AsteroidL):
+                asteroid.kill(laser.angle)
+            else:
+                asteroid.kill()
+            laser.kill()
         
         # Count down the spawn timer
         next_spawn_time_left -= 1 / FPS

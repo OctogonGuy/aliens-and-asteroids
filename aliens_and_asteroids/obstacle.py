@@ -19,6 +19,7 @@ ASTEROID_S_SPEED = 2.5
 ASTEROID_M_SPEED = 2
 ASTEROID_L_SPEED = 1.5
 ASTEROID_MAX_ROTATE_ANGLE = 7.5
+NUM_PIECES = 3 # Number of broken asteroid pieces M and L split into
 
 class Obstacle(pg.sprite.Sprite):
     """Abstract class for any obstacle"""
@@ -319,15 +320,29 @@ class AsteroidS(Asteroid):
         self.speed = random.uniform(ASTEROID_S_SPEED - ASTEROID_SPEED_RANGE, ASTEROID_S_SPEED + ASTEROID_SPEED_RANGE)
     
 class AsteroidM(Asteroid):
-    """A medium asteroid that splits into 3 small asteroids when shot"""
+    """A medium asteroid that splits into more small asteroids when shot"""
     
     def __init__(self, *groups):
         super().__init__(groups)
         self.speed = random.uniform(ASTEROID_M_SPEED - ASTEROID_SPEED_RANGE, ASTEROID_M_SPEED + ASTEROID_SPEED_RANGE)
+        
+    def kill(self, laser_angle):
+        for _ in range(NUM_PIECES):
+            piece = AsteroidS(self.groups())
+            piece.pos = geometry.Position(self.pos.x, self.pos.y)
+            piece.angle = random.uniform(laser_angle - math.pi/2, laser_angle + math.pi/2)
+        super().kill()
 
 class AsteroidL(Asteroid):
-    """A large asteroid that splits into 3 medium asteroids when shot"""
+    """A large asteroid that splits into more medium asteroids when shot"""
     
     def __init__(self, *groups):
         super().__init__(groups)
         self.speed = random.uniform(ASTEROID_L_SPEED - ASTEROID_SPEED_RANGE, ASTEROID_M_SPEED + ASTEROID_SPEED_RANGE)
+        
+    def kill(self, laser_angle):
+        for _ in range(NUM_PIECES):
+            piece = AsteroidM(self.groups())
+            piece.pos = geometry.Position(self.pos.x, self.pos.y)
+            piece.angle = random.uniform(laser_angle - math.pi/2, laser_angle + math.pi/2)
+        super().kill()
