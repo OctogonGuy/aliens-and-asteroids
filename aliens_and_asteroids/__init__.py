@@ -64,6 +64,12 @@ def main():
     obstacle.AsteroidM.images = [load_image('asteroid_m.gif')]
     obstacle.AsteroidL.images = [load_image('asteroid_l.gif')]
     
+    # Load sounds
+    laser_sound = load_sound('laser.wav')
+    alien_kill_sound = load_sound('alien_kill.wav')
+    asteroid_kill_sound = load_sound('asteroid_kill.wav')
+    spaceship_kill_sound = load_sound('spaceship_kill.wav')
+    
     # Create the background and tile the background image
     bgtile = load_image('background.gif')
     background = pg.surface.Surface(SCREENRECT.size)
@@ -101,6 +107,7 @@ def main():
                 # Handle shooting
                 if event.type == KEYDOWN and event.key == K_SPACE:
                     player.shoot(sprites, lasers)
+                    laser_sound.play()
                     
             # Handle player movement
             keystate = pg.key.get_pressed()
@@ -144,12 +151,15 @@ def main():
             
             # Detect collisions between aliens/asteroids and player
             # If collision is detected, kill player
-            pg.sprite.groupcollide(aliens, playergroup, False, True)
-            pg.sprite.groupcollide(asteroids, playergroup, False, True)
+            for _ in pg.sprite.groupcollide(aliens, playergroup, False, True):
+                spaceship_kill_sound.play()
+            for _ in pg.sprite.groupcollide(asteroids, playergroup, False, True):
+                spaceship_kill_sound.play()
             
             # Detect collisions between aliens/asteroids and laser
             # If collision is detected, kill obstacle and remove laser
             for alien in pg.sprite.groupcollide(aliens, lasers, True, True):
+                alien_kill_sound.play()
                 score += alien.points
             for asteroid, laser_list in pg.sprite.groupcollide(asteroids, lasers, False, False).items():
                 laser = laser_list[0]
@@ -158,6 +168,7 @@ def main():
                 else:
                     asteroid.kill()
                 laser.kill()
+                asteroid_kill_sound.play()
                 score += asteroid.points
             
             # Count down the spawn timer
@@ -199,6 +210,12 @@ def load_image(filename):
     except pg.error:
         raise SystemExit(f'Could not load image "{file}" {pg.get_error()}')
     return surface.convert()
+
+def load_sound(filename):
+    """Loads an audio file."""
+    main_dir = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
+    file = os.path.join(main_dir, 'data', filename)
+    return pg.mixer.Sound(file)
 
 def load_font(filename, size):
     """Loads a font file."""
