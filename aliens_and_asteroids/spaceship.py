@@ -15,8 +15,8 @@ class Spaceship(pg.sprite.Sprite):
     
     images = []
     
-    def __init__(self, pos=(0, 0), direction=0.0, *groups):
-        super().__init__(groups)
+    def __init__(self, pos=(0, 0), direction=0.0, sprite_group=None, *groups):
+        super().__init__(sprite_group, groups)
         self.area = pg.display.get_surface()
         
         self.pos = geometry.Position(pos[0], pos[1])
@@ -25,6 +25,8 @@ class Spaceship(pg.sprite.Sprite):
         self.images = [pg.transform.rotate(image, -90.0) for image in self.images]
         self.image = pg.transform.rotate(self.images[0], -self.velocity.direction)
         self.rect = self.image.get_rect(center=self.pos.xy())
+        
+        self.exhaust = Exhaust(self, sprite_group)
         
     def forward(self):
         """Moves the spaceship forward."""
@@ -73,9 +75,48 @@ class Spaceship(pg.sprite.Sprite):
         
         # Position the spaceship's rectangle on the screen
         self.rect.center = self.pos.xy()
+        
+        # Update exhaust
+        self.exhaust.update()
+        
+        
+class Exhaust(pg.sprite.Sprite):
+    """Sprite for the exhaust that comes out of the rocket"""
+    
+    images = []
+    
+    def __init__(self, spaceship, groups):
+        super().__init__(groups)
+        self.spaceship = spaceship
+        self.image_index = 0
+        self.images = [pg.transform.rotate(image, -90.0) for image in self.images]
+        self.pos = geometry.Position(0, 0)
+        self.update()
+        
+    def update(self):
+        """Moves the exhaust with the spaceship"""
+        
+        # Change size depending on the velocity
+        self.image = self.images[self.image_index]
+        scale = max(self.spaceship.velocity.magnitude / FORWARD_MAX_SPEED, 0)
+        self.image = pg.transform.scale_by(self.image, scale)
+        
+        # Change position
+        angle = math.radians(self.spaceship.velocity.direction)
+        self.pos.x = self.spaceship.pos.x - math.cos(angle) * \
+                (Spaceship.images[0].get_height() / 2 +  self.image.get_width() / 2 + 1)
+        self.pos.y = self.spaceship.pos.y - math.sin(angle) * \
+                (Spaceship.images[0].get_height() / 2 +  self.image.get_width() / 2 + 1)
+        
+        # Change angle
+        self.image = pg.transform.rotate(self.image, -self.spaceship.velocity.direction)
+        
+        # Position the exhaust's rectangle on the screen
+        self.rect = self.image.get_rect(center=self.pos.xy())
 
 
 class Laser(pg.sprite.Sprite):
+    """Represents a projectile that can be fired at obstacles"""
     
     images = []
     

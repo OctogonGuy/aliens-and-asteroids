@@ -17,7 +17,8 @@ FPS = 60
 SPAWN_RATE = 3 #s
 AMMO_CAP = 2
 RELOAD_RATE = 1 #s
-ANIMATION_RATE = 0.5 #s
+OBSTACLE_ANIMATION_RATE = 0.5 #s
+EXHAUST_ANIMATION_RATE = 0.1 #s
 OBSTACLE_CHOICE_WEIGHTS = { # Weighted likelihood of obstacles being chosen
     obstacle.AlienA: 3,
     obstacle.AlienB: 2,
@@ -74,6 +75,7 @@ def main():
     
     # Load images and assign them to sprite classes
     spaceship.Spaceship.images = [load_image('spaceship.gif')]
+    spaceship.Exhaust.images = [load_image('exhaust1.gif'), load_image('exhaust2.gif')]
     spaceship.Laser.images = [load_image('laser.gif')]
     obstacle.AlienA.images = [load_image('alien_a1.gif'), load_image('alien_a2.gif')]
     obstacle.AlienB.images = [load_image('alien_b1.gif'), load_image('alien_b2.gif')]
@@ -122,8 +124,10 @@ def main():
     # Run the main loop
     clock = pg.time.Clock()
     alien_animation_timer = pg.USEREVENT + 1
+    exhaust_animation_timer = pg.USEREVENT + 2
     image_index = 0
-    pg.time.set_timer(alien_animation_timer, int(ANIMATION_RATE * 1000))
+    pg.time.set_timer(alien_animation_timer, int(OBSTACLE_ANIMATION_RATE * 1000))
+    pg.time.set_timer(exhaust_animation_timer, int(EXHAUST_ANIMATION_RATE * 1000))
     running = True
     while running:
         # If the player is still alive, run the game
@@ -147,6 +151,10 @@ def main():
                     else: image_index = 0
                     for alien in aliens.spritedict:
                         alien.image_index = image_index
+                if event.type == exhaust_animation_timer:
+                    if image_index == 0: image_index = 1
+                    else: image_index = 0
+                    player.exhaust.image_index = image_index
                     
             # Handle player movement
             keystate = pg.key.get_pressed()
