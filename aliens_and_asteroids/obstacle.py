@@ -6,9 +6,9 @@ import pygame as pg
 from aliens_and_asteroids.locals import *
 
 # Alien constants
-ALIEN_A_SPEED = 4.2
-ALIEN_B_SPEED = 3.0
-ALIEN_C_SPEED = 2.6
+ALIEN_A_SPEED = 3.15
+ALIEN_B_SPEED = 2.7
+ALIEN_C_SPEED = 2.3
 ALIEN_A_DESCEND_DISTANCE = 50
 ALIEN_B_MIN_MOVE_DISTANCE = 40
 ALIEN_B_MAX_MOVE_DISTANCE = 240
@@ -17,10 +17,10 @@ ALIEN_B_POINTS = 3
 ALIEN_C_POINTS = 5
 
 # Asteroid constants
-ASTEROID_SPEED_RANGE = 1
-ASTEROID_S_SPEED = 2.5
-ASTEROID_M_SPEED = 2
-ASTEROID_L_SPEED = 1.5
+ASTEROID_SPEED_RANGE = 0.5
+ASTEROID_S_SPEED = 2
+ASTEROID_M_SPEED = 1.5
+ASTEROID_L_SPEED = 1
 ASTEROID_MAX_ROTATE_ANGLE = 7.5
 NUM_PIECES = 3 # Number of broken asteroid pieces M and L split into
 ASTEROID_POINTS = 1
@@ -238,14 +238,15 @@ class AlienC(Alien):
         delta_y = self.player.pos.y - self.pos.y
         # If the alien and player on opposite sides of the screen,
         # account for moving to opposite side when calculating distance
-        if delta_x > self.area.get_width() / 2:
-            delta_x = -((self.area.get_width() - self.player.pos.x) + self.pos.x)
-        elif delta_x < -(self.area.get_width() / 2):
-            delta_x = self.player.pos.x + (self.area.get_width() - self.pos.x)
-        if delta_y > self.area.get_height() / 2:
-            delta_y = -((self.area.get_height() - self.player.pos.y) + self.pos.y)
-        elif delta_y < -(self.area.get_height() / 2):
-            delta_y = self.player.pos.y + (self.area.get_height() - self.pos.y)
+        if self.offscreen_position is None:
+            if delta_x > self.area.get_width() / 2:
+                delta_x = -((self.area.get_width() - self.player.pos.x) + self.pos.x)
+            elif delta_x < -(self.area.get_width() / 2):
+                delta_x = self.player.pos.x + (self.area.get_width() - self.pos.x)
+            if delta_y > self.area.get_height() / 2:
+                delta_y = -((self.area.get_height() - self.player.pos.y) + self.pos.y)
+            elif delta_y < -(self.area.get_height() / 2):
+                delta_y = self.player.pos.y + (self.area.get_height() - self.pos.y)
         
         # Calculate the angle between alien and player
         if delta_x > 0:
