@@ -15,6 +15,8 @@ SCREENRECT = pg.Rect(0, 0, 640, 480)
 SCREEN_WIDTH, SCREEN_HEIGHT = SCREENRECT.size
 FPS = 60
 SPAWN_RATE = 2 #s
+AMMO_CAP = 2
+RELOAD_RATE = 1 #s
 GAME_OVER_SCREEN_COLOR = '#26144d'
 TEXT_COLOR = 'white'
 GAME_OVER_TEXT = 'GAME OVER'
@@ -24,10 +26,16 @@ SCORE_TEXT = 'Your score is {}'
 
 def new_game():
     """Starts a new game."""
-    global aliens, asteroids, lasers, sprites, playergroup, player, score
+    global aliens, asteroids, lasers, sprites, playergroup, player, \
+        ammo, spawn_time_left, reload_time_left, reloading, score
     
     # Initialize score
     score = 0
+    
+    # Initialize other variables
+    spawn_time_left = 0
+    reload_time_left = 0
+    reloading = False
     
     # Initialize game groups
     aliens = pg.sprite.Group()
@@ -38,13 +46,14 @@ def new_game():
     
     # Create player
     player = spaceship.Spaceship((SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2), -90.0, sprites, playergroup)
+    ammo = AMMO_CAP
     
     # Show background
     screen.blit(background, (0, 0))
     
 
 def main():
-    global screen, background, score
+    global screen, background, ammo, spawn_time_left, reload_time_left, reloading, score
     # Initialize pygame
     pg.init()
     pg.mixer.init()
@@ -95,7 +104,6 @@ def main():
     
     # Run the main loop
     clock = pg.time.Clock()
-    next_spawn_time_left = 0
     running = True
     while running:
         # If the player is still alive, run the game
@@ -105,9 +113,13 @@ def main():
                     running = False
                 
                 # Handle shooting
-                if event.type == KEYDOWN and event.key == K_SPACE:
+                if event.type == KEYDOWN and event.key == K_SPACE and ammo > 0:
                     player.shoot(sprites, lasers)
                     laser_sound.play()
+                    ammo -= 1
+                    if not reloading:
+                        reloading = True
+                        reload_time_left = RELOAD_RATE
                     
             # Handle player movement
             keystate = pg.key.get_pressed()
@@ -121,7 +133,7 @@ def main():
                 player.rotate(direction)
                 
             # If spawn timer is up, spawn next enemy/obstacle
-            if next_spawn_time_left <= 0:
+            if spawn_time_left <= 0:
                 obstacles = (
                     obstacle.AlienA, obstacle.AlienB, obstacle.AlienC,
                     obstacle.AsteroidS, obstacle.AsteroidM, obstacle.AsteroidL
@@ -134,7 +146,13 @@ def main():
                 else:
                     clazz(sprites, asteroids)
                     
-                next_spawn_time_left = SPAWN_RATE
+                spawn_time_left = SPAWN_RATE
+            
+            # If reload timer is up, reload
+            if reloading and reload_time_left <= 0:
+                ammo += 1
+                if ammo == AMMO_CAP:
+                    reloading = False
                 
             # Display background
             screen.blit(background, (0, 0))
@@ -172,7 +190,10 @@ def main():
                 score += asteroid.points
             
             # Count down the spawn timer
-            next_spawn_time_left -= 1 / FPS
+            spawn_time_left -= 1 / FPS
+            # Count down the reload timer
+            if reloading:
+                reload_time_left -= 1 / FPS
             
         # If the player is not alive, display the game over screen
         else:
