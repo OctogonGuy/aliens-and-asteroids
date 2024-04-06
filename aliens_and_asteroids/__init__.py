@@ -87,6 +87,8 @@ def main():
     alien_kill_sound = load_sound('alien_kill.wav')
     asteroid_kill_sound = load_sound('asteroid_kill.wav')
     spaceship_kill_sound = load_sound('spaceship_kill.wav')
+    load_music('maxstack - through space.ogg')
+    pg.mixer.music.play(-1)
     
     # Create the background and tile the background image
     bgtile = load_image('background.gif')
@@ -258,6 +260,12 @@ def load_sound(filename):
     main_dir = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
     file = os.path.join(main_dir, 'data', filename)
     return pg.mixer.Sound(file)
+
+def load_music(filename):
+    """Loads an audio file."""
+    main_dir = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
+    file = os.path.join(main_dir, 'data', filename)
+    pg.mixer.music.load(file)
 
 def load_font(filename, size):
     """Loads a font file."""
