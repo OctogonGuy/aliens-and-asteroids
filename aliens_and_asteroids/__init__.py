@@ -17,6 +17,7 @@ FPS = 60
 SPAWN_RATE = 3 #s
 AMMO_CAP = 2
 RELOAD_RATE = 1 #s
+ANIMATION_RATE = 0.5 #s
 GAME_OVER_SCREEN_COLOR = '#26144d'
 TEXT_COLOR = 'white'
 GAME_OVER_TEXT = 'GAME OVER'
@@ -66,9 +67,9 @@ def main():
     # Load images and assign them to sprite classes
     spaceship.Spaceship.images = [load_image('spaceship.gif')]
     spaceship.Laser.images = [load_image('laser.gif')]
-    obstacle.AlienA.images = [load_image('alien_a1.gif')]
-    obstacle.AlienB.images = [load_image('alien_b1.gif')]
-    obstacle.AlienC.images = [load_image('alien_c1.gif')]
+    obstacle.AlienA.images = [load_image('alien_a1.gif'), load_image('alien_a2.gif')]
+    obstacle.AlienB.images = [load_image('alien_b1.gif'), load_image('alien_b2.gif')]
+    obstacle.AlienC.images = [load_image('alien_c1.gif'), load_image('alien_c2.gif')]
     obstacle.AsteroidS.images = [load_image('asteroid_s.gif')]
     obstacle.AsteroidM.images = [load_image('asteroid_m.gif')]
     obstacle.AsteroidL.images = [load_image('asteroid_l.gif')]
@@ -104,6 +105,9 @@ def main():
     
     # Run the main loop
     clock = pg.time.Clock()
+    alien_animation_timer = pg.USEREVENT + 1
+    image_index = 0
+    pg.time.set_timer(alien_animation_timer, int(ANIMATION_RATE * 1000))
     running = True
     while running:
         # If the player is still alive, run the game
@@ -120,6 +124,13 @@ def main():
                     if not reloading:
                         reloading = True
                         reload_time_left = RELOAD_RATE
+                
+                # Handle animation
+                if event.type == alien_animation_timer:
+                    if image_index == 0: image_index = 1
+                    else: image_index = 0
+                    for alien in aliens.spritedict:
+                        alien.image_index = image_index
                     
             # Handle player movement
             keystate = pg.key.get_pressed()
@@ -136,7 +147,7 @@ def main():
             if spawn_time_left <= 0:
                 obstacles = (
                     obstacle.AlienA, obstacle.AlienB, obstacle.AlienC,
-                    obstacle.AsteroidS, obstacle.AsteroidM, obstacle.AsteroidL
+                    #obstacle.AsteroidS, obstacle.AsteroidM, obstacle.AsteroidL
                 )
                 clazz = random.choice(obstacles)
                 if issubclass(clazz, obstacle.AlienC):

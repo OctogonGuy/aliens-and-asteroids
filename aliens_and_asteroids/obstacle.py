@@ -76,9 +76,12 @@ class Alien(Obstacle):
 
     def __init__(self, *groups):
         super().__init__(groups)
+        self.image_index = 0
     
     def update(self):
         """Updates the position of the alien on the screen."""
+        # Change the image for the animation
+        self.image = self.images[self.image_index]
         # Move according to subclass pattern
         self.move()
         # Move the alien to the opposite side if out of bounds
@@ -124,7 +127,7 @@ class AlienA(Alien):
         self.reached_end = False
         
         # Rotate image in the direction of movement
-        self.image = pg.transform.rotate(self.images[0], self.descend_direction.angle() + 90)
+        self.image = pg.transform.rotate(self.images[self.image_index], self.descend_direction.angle() + 90)
         self.rect = self.image.get_rect(center=self.rect.center)
         
     def move(self):
@@ -215,7 +218,7 @@ class AlienB(Alien):
             angle = 360
         
         # Rotate image in the direction of movement
-        self.image = pg.transform.rotate(self.images[0], -angle - 90)
+        self.image = pg.transform.rotate(self.images[self.image_index], -angle - 90)
         self.rect = self.image.get_rect(center=self.rect.center)
     
     def new_target(self):
@@ -263,7 +266,7 @@ class AlienC(Alien):
         self.pos.y += math.sin(angle) * self.speed
         
         # Rotate image in the direction of movement
-        self.image = pg.transform.rotate(self.images[0], -math.degrees(angle) - 90)
+        self.image = pg.transform.rotate(self.images[self.image_index], -math.degrees(angle) - 90)
         self.rect = self.image.get_rect(center=self.rect.center)
         
 
