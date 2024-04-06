@@ -18,6 +18,14 @@ SPAWN_RATE = 3 #s
 AMMO_CAP = 2
 RELOAD_RATE = 1 #s
 ANIMATION_RATE = 0.5 #s
+OBSTACLE_CHOICE_WEIGHTS = { # Weighted likelihood of obstacles being chosen
+    obstacle.AlienA: 3,
+    obstacle.AlienB: 2,
+    obstacle.AlienC: 1,
+    obstacle.AsteroidS: 3,
+    obstacle.AsteroidM: 2,
+    obstacle.AsteroidL: 1,
+    }
 GAME_OVER_SCREEN_COLOR = '#26144d'
 TEXT_COLOR = 'white'
 GAME_OVER_TEXT = 'GAME OVER'
@@ -100,6 +108,12 @@ def main():
     playagain_message = subtitle_font.render(PLAY_AGAIN_PROMPT_TEXT, True, TEXT_COLOR)
     playagain_rect = playagain_message.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT * 4 / 5))
     
+    # Create a list of obstacle choices with weighted probabilities of being chosen
+    obstacle_choices = []
+    for obs, weight in OBSTACLE_CHOICE_WEIGHTS.items():
+        for _ in range(weight):
+            obstacle_choices.append(obs)
+    
     # Start first game
     new_game()
     
@@ -145,11 +159,7 @@ def main():
                 
             # If spawn timer is up, spawn next enemy/obstacle
             if spawn_time_left <= 0:
-                obstacles = (
-                    obstacle.AlienA, obstacle.AlienB, obstacle.AlienC,
-                    #obstacle.AsteroidS, obstacle.AsteroidM, obstacle.AsteroidL
-                )
-                clazz = random.choice(obstacles)
+                clazz = random.choice(obstacle_choices)
                 if issubclass(clazz, obstacle.AlienC):
                     clazz(player, sprites, aliens)
                 elif issubclass(clazz, obstacle.Alien):
