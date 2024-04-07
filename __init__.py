@@ -7,7 +7,8 @@ import os
 import random
 import pygame as pg
 from pygame.locals import *
-from aliens_and_asteroids import spaceship, obstacle
+import spaceship
+import obstacle
 #from click.decorators import group
 
 ICON = 'alien_a1.gif'
@@ -125,7 +126,8 @@ def main():
     clock = pg.time.Clock()
     alien_animation_timer = pg.USEREVENT + 1
     exhaust_animation_timer = pg.USEREVENT + 2
-    image_index = 0
+    alien_image_index = 0
+    exhaust_image_index = 0
     pg.time.set_timer(alien_animation_timer, int(OBSTACLE_ANIMATION_RATE * 1000))
     pg.time.set_timer(exhaust_animation_timer, int(EXHAUST_ANIMATION_RATE * 1000))
     running = True
@@ -147,14 +149,14 @@ def main():
                 
                 # Handle animation
                 if event.type == alien_animation_timer:
-                    if image_index == 0: image_index = 1
-                    else: image_index = 0
+                    if alien_image_index == 0: alien_image_index = 1
+                    else: alien_image_index = 0
                     for alien in aliens.spritedict:
-                        alien.image_index = image_index
+                        alien.image_index = alien_image_index
                 if event.type == exhaust_animation_timer:
-                    if image_index == 0: image_index = 1
-                    else: image_index = 0
-                    player.exhaust.image_index = image_index
+                    if exhaust_image_index == 0: exhaust_image_index = 1
+                    else: exhaust_image_index = 0
+                    player.exhaust.image_index = exhaust_image_index
                     
             # Handle player movement
             keystate = pg.key.get_pressed()
@@ -255,8 +257,9 @@ def main():
 
 def load_image(filename):
     """Loads an image."""
-    main_dir = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
-    file = os.path.join(main_dir, 'data', filename)
+    #main_dir = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
+    #file = os.path.join(main_dir, 'data', filename)
+    file = 'data/' + filename
     try:
         surface = pg.image.load(file)
     except pg.error:
@@ -265,20 +268,23 @@ def load_image(filename):
 
 def load_sound(filename):
     """Loads an audio file."""
-    main_dir = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
-    file = os.path.join(main_dir, 'data', filename)
+    #main_dir = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
+    #file = os.path.join(main_dir, 'data', filename)
+    file = 'data/' + filename
     return pg.mixer.Sound(file)
 
 def load_music(filename):
     """Loads an audio file."""
-    main_dir = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
-    file = os.path.join(main_dir, 'data', filename)
+    #main_dir = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
+    #file = os.path.join(main_dir, 'data', filename)
+    file = 'data/' + filename
     pg.mixer.music.load(file)
 
 def load_font(filename, size):
     """Loads a font file."""
-    main_dir = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
-    file = os.path.join(main_dir, 'data', filename)
+    #main_dir = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
+    #file = os.path.join(main_dir, 'data', filename)
+    file = 'data/' + filename
     return pg.font.Font(file, size)
 
 if __name__ == '__main__':

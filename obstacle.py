@@ -3,7 +3,7 @@
 import math
 import random
 import pygame as pg
-from aliens_and_asteroids.locals import *
+from locals import *
 
 # Alien constants
 ALIEN_A_SPEED = 3.15
@@ -184,6 +184,27 @@ class AlienB(Alien):
         super().__init__(groups)
         self.speed = ALIEN_B_SPEED
         self.points = ALIEN_B_POINTS
+        
+        # Initial position is random position just off screen but excluding corners
+        screen_width = self.area.get_width()
+        screen_height = self.area.get_height()
+        img_half_width = self.images[0].get_width()
+        img_half_height = self.images[0].get_height()
+        side = random.choice(list(geometry.Direction))
+        if side == geometry.Direction.UP:
+            pos_x = random.randint(0, screen_width)
+            pos_y = -img_half_height
+        elif side == geometry.Direction.DOWN:
+            pos_x = random.randint(0, screen_width)
+            pos_y = screen_height + img_half_height
+        elif side == geometry.Direction.LEFT:
+            pos_x = -img_half_height
+            pos_y = random.randint(0, screen_height)
+        else: # side == geometry.Direction.RIGHT
+            pos_x = screen_width + img_half_width
+            pos_y = random.randint(0, screen_height)
+        self.pos = geometry.Position(pos_x, pos_y)
+        self.offscreen_position = side
         
         # Set first target to just come on screen
         self.direction = self.offscreen_position.opposite()

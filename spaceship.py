@@ -1,6 +1,6 @@
 import math
 import pygame as pg
-from aliens_and_asteroids import geometry
+import geometry
 
 FORWARD_ACCELERATION = 0.09
 FORWARD_MAX_SPEED = 4.2
