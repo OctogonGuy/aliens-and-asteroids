@@ -257,9 +257,7 @@ def main():
 
 def load_image(filename):
     """Loads an image."""
-    #main_dir = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
-    #file = os.path.join(main_dir, 'data', filename)
-    file = 'data/' + filename
+    file = os.path.join('data', filename)
     try:
         surface = pg.image.load(file)
     except pg.error:
@@ -268,23 +266,17 @@ def load_image(filename):
 
 def load_sound(filename):
     """Loads an audio file."""
-    #main_dir = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
-    #file = os.path.join(main_dir, 'data', filename)
-    file = 'data/' + filename
+    file = os.path.join('data', filename)
     return pg.mixer.Sound(file)
 
 def load_music(filename):
     """Loads an audio file."""
-    #main_dir = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
-    #file = os.path.join(main_dir, 'data', filename)
-    file = 'data/' + filename
+    file = os.path.join('data', filename)
     pg.mixer.music.load(file)
 
 def load_font(filename, size):
     """Loads a font file."""
-    #main_dir = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
-    #file = os.path.join(main_dir, 'data', filename)
-    file = 'data/' + filename
+    file = os.path.join('data', filename)
     return pg.font.Font(file, size)
 
 if __name__ == '__main__':
