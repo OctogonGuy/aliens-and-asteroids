@@ -9,6 +9,7 @@ BACKWARD_MAX_SPEED = 1.8
 ROTATE_SPEED = 0.7
 AIR_RESISTANCE = 0.02
 LASER_SPEED = 10
+LASER_TRAVEL_DISTANCE = 640 # px
 
 class Spaceship(pg.sprite.Sprite):
     """A spaceship that can move and shoot"""
@@ -128,6 +129,7 @@ class Laser(pg.sprite.Sprite):
         self.pos = geometry.Position(spaceship.pos.x, spaceship.pos.y)
         self.pos.x += math.cos(self.angle) * (spaceship.image.get_height() / 2)
         self.pos.y += math.sin(self.angle) * (spaceship.image.get_height() / 2)
+        self.distance_left = LASER_TRAVEL_DISTANCE;
         
         self.images = [pg.transform.rotate(image, -90.0) for image in self.images]
         self.image = pg.transform.rotate(self.images[0], -spaceship.velocity.direction)
@@ -135,8 +137,21 @@ class Laser(pg.sprite.Sprite):
         
     def update(self):
         """Moves the laser forward."""
-        self.pos.x += math.cos(self.angle) * LASER_SPEED
-        self.pos.y += math.sin(self.angle) * LASER_SPEED
         
-        # Position the laser's rectangle on the screen
-        self.rect.center = self.pos.xy()
+        # Remove laser if it has traveled its maximum distance
+        self.distance_left -= LASER_SPEED
+        if self.distance_left < 0:
+            self.kill()
+        
+        # Otherwise, position the laser's rectangle on the screen
+        else:
+            self.pos.x += math.cos(self.angle) * LASER_SPEED
+            self.pos.y += math.sin(self.angle) * LASER_SPEED
+            self.rect.center = self.pos.xy()
+            # Move the laser to the opposite side if out of bounds
+            if not self.area.get_rect().collidepoint(self.pos.xy()):
+                if self.pos.x > self.area.get_width(): self.pos.x = 0
+                elif self.pos.x < 0: self.pos.x = self.area.get_width()
+                if self.pos.y > self.area.get_height(): self.pos.y = 0
+                elif self.pos.y < 0: self.pos.y = self.area.get_height()
+            
