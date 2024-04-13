@@ -16,10 +16,10 @@ ICON = 'alien_a1.gif'
 SCREENRECT = pg.Rect(0, 0, 640, 480)
 SCREEN_WIDTH, SCREEN_HEIGHT = SCREENRECT.size
 FPS = 60
-AMMO_CAP = 2
+AMMO_CAP = 3
 RELOAD_RATE = 1 #s
 OBSTACLE_ANIMATION_RATE = 0.5 #s
-EXHAUST_ANIMATION_RATE = 0.1 #s
+EXHAUST_ANIMATION_RATE = 0.67 #s
 OBSTACLE_CHOICE_WEIGHTS = { # Weighted likelihood of obstacles being chosen
     obstacle.AlienA: 3,
     obstacle.AlienB: 2,
@@ -32,8 +32,8 @@ GAME_OVER_SCREEN_COLOR = '#26144d'
 TEXT_COLOR = 'white'
 GAME_OVER_TEXT = 'GAME OVER'
 GAME_OVER_IMAGE = 'spaceship.gif'
-PLAY_AGAIN_PROMPT_TEXT = 'Press SPACE to play again.'
-SCORE_TEXT = 'Your score is {}'
+PLAY_AGAIN_PROMPT_TEXT = 'Press ENTER to play again.'
+SCORE_TEXT = 'Your final score: {}'
 FIRST_SPAWN_TIME = 0.5      # Time after which first obstacle will spawn
 INITIAL_SPAWN_RATE = 5      # Initial spawn rate
 MID_SPAWN_RATE_TIME = 25    # Time after which spawn rate halfway between initial and limit
@@ -254,7 +254,7 @@ def main():
                     running = False
                 
                 # Handle starting new game
-                if event.type == KEYDOWN and event.key == K_SPACE:
+                if event.type == KEYDOWN and event.key == K_RETURN:
                     new_game()
         
         # Update display and advance frame
@@ -273,12 +273,9 @@ def update_spawn_rate():
     h = MID_SPAWN_RATE_TIME
     L = SPAWN_RATE_LIMIT
     spawn_rate = (h / ((t / 4) + (h / (k - L)))) + L
-    print(spawn_rate)
     
 def elapsed_time():
     """Returns the execution time in seconds."""
-    print("start time:\t", start_time)
-    print("cur time:\t", time.time())
     return time.time() - start_time
 
 def load_image(filename):
