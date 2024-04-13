@@ -5,6 +5,7 @@
 
 import os
 import random
+import time
 import pygame as pg
 from pygame.locals import *
 import spaceship
@@ -15,7 +16,6 @@ ICON = 'alien_a1.gif'
 SCREENRECT = pg.Rect(0, 0, 640, 480)
 SCREEN_WIDTH, SCREEN_HEIGHT = SCREENRECT.size
 FPS = 60
-SPAWN_RATE = 3 #s
 AMMO_CAP = 2
 RELOAD_RATE = 1 #s
 OBSTACLE_ANIMATION_RATE = 0.5 #s
@@ -34,11 +34,17 @@ GAME_OVER_TEXT = 'GAME OVER'
 GAME_OVER_IMAGE = 'spaceship.gif'
 PLAY_AGAIN_PROMPT_TEXT = 'Press SPACE to play again.'
 SCORE_TEXT = 'Your score is {}'
+FIRST_SPAWN_TIME = 0.5      # Time after which first obstacle will spawn
+INITIAL_SPAWN_RATE = 5      # Initial spawn rate
+MID_SPAWN_RATE_TIME = 25    # Time after which spawn rate halfway between initial and limit
+SPAWN_RATE_LIMIT = 1        # Spawn rate will approach but not reach this value
+
 
 def new_game():
     """Starts a new game."""
     global aliens, asteroids, lasers, sprites, playergroup, player, \
-        ammo, spawn_time_left, reload_time_left, reloading, score
+        ammo, spawn_time_left, reload_time_left, reloading, score, \
+        spawn_rate, start_time
     
     # Initialize score
     score = 0
@@ -47,6 +53,8 @@ def new_game():
     spawn_time_left = 0
     reload_time_left = 0
     reloading = False
+    start_time = time.time()
+    spawn_rate = FIRST_SPAWN_TIME
     
     # Initialize game groups
     aliens = pg.sprite.Group()
@@ -180,7 +188,8 @@ def main():
                 else:
                     clazz(sprites, asteroids)
                     
-                spawn_time_left = SPAWN_RATE
+                update_spawn_rate()
+                spawn_time_left = spawn_rate
             
             # If reload timer is up, reload
             if reloading and reload_time_left <= 0:
@@ -255,6 +264,22 @@ def main():
     # Quit pygame
     pg.mixer.quit()
     pg.quit()
+    
+def update_spawn_rate():
+    """Updates the spawn rate according to a decreasing function."""
+    global spawn_rate
+    t = elapsed_time()
+    k = INITIAL_SPAWN_RATE
+    h = MID_SPAWN_RATE_TIME
+    L = SPAWN_RATE_LIMIT
+    spawn_rate = (h / ((t / 4) + (h / (k - L)))) + L
+    print(spawn_rate)
+    
+def elapsed_time():
+    """Returns the execution time in seconds."""
+    print("start time:\t", start_time)
+    print("cur time:\t", time.time())
+    return time.time() - start_time
 
 def load_image(filename):
     """Loads an image."""
