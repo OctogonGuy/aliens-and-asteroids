@@ -298,6 +298,10 @@ class Asteroid(Obstacle):
         super().__init__(groups)
         self.points = ASTEROID_POINTS
         
+        # Choose a random image from the available images
+        self.image_index = random.randint(0, len(self.images) - 1)
+        self.image = self.images[self.image_index]
+        
         # Calculate the angles between asteroid and points
         raypoints = []
         if self.offscreen_position == UP:
@@ -340,7 +344,7 @@ class Asteroid(Obstacle):
         
         # Rotate
         self.rotation += self.rotation_amt
-        self.image = pg.transform.rotate(self.images[0], self.rotation)
+        self.image = pg.transform.rotate(self.images[self.image_index], self.rotation)
         
         # Position the asteroid's rectangle on the screen
         self.rect = self.image.get_rect(center=self.pos.xy())

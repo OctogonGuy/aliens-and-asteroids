@@ -76,14 +76,14 @@ def main():
     
     # Load images and assign them to sprite classes
     spaceship.Spaceship.images = [load_image('spaceship.gif')]
-    spaceship.Exhaust.images = [load_image('exhaust1.gif'), load_image('exhaust2.gif')]
+    spaceship.Exhaust.images = [load_image('exhaust1.gif'), load_image('exhaust2.gif'), load_image('exhaust3.gif')]
     spaceship.Laser.images = [load_image('laser.gif')]
     obstacle.AlienA.images = [load_image('alien_a1.gif'), load_image('alien_a2.gif')]
     obstacle.AlienB.images = [load_image('alien_b1.gif'), load_image('alien_b2.gif')]
     obstacle.AlienC.images = [load_image('alien_c1.gif'), load_image('alien_c2.gif')]
-    obstacle.AsteroidS.images = [load_image('asteroid_s.gif')]
-    obstacle.AsteroidM.images = [load_image('asteroid_m.gif')]
-    obstacle.AsteroidL.images = [load_image('asteroid_l.gif')]
+    obstacle.AsteroidS.images = [load_image('asteroid_s1.gif'), load_image('asteroid_s2.gif'), load_image('asteroid_s3.gif')]
+    obstacle.AsteroidM.images = [load_image('asteroid_m1.gif'), load_image('asteroid_m2.gif'), load_image('asteroid_m3.gif')]
+    obstacle.AsteroidL.images = [load_image('asteroid_l1.gif'), load_image('asteroid_l2.gif'), load_image('asteroid_l3.gif')]
     
     # Load sounds
     laser_sound = load_sound('laser.wav')
@@ -128,6 +128,7 @@ def main():
     exhaust_animation_timer = pg.USEREVENT + 2
     alien_image_index = 0
     exhaust_image_index = 0
+    num_exhaust_images = len(spaceship.Exhaust.images)
     pg.time.set_timer(alien_animation_timer, int(OBSTACLE_ANIMATION_RATE * 1000))
     pg.time.set_timer(exhaust_animation_timer, int(EXHAUST_ANIMATION_RATE * 1000))
     running = True
@@ -154,8 +155,8 @@ def main():
                     for alien in aliens.spritedict:
                         alien.image_index = alien_image_index
                 if event.type == exhaust_animation_timer:
-                    if exhaust_image_index == 0: exhaust_image_index = 1
-                    else: exhaust_image_index = 0
+                    exhaust_image_index += 1
+                    if exhaust_image_index >= num_exhaust_images: exhaust_image_index = 0
                     player.exhaust.image_index = exhaust_image_index
                     
             # Handle player movement
