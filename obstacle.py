@@ -12,17 +12,17 @@ ALIEN_C_SPEED = 2.3
 ALIEN_A_DESCEND_DISTANCE = 50
 ALIEN_B_MIN_MOVE_DISTANCE = 40
 ALIEN_B_MAX_MOVE_DISTANCE = 220
-ALIEN_A_POINTS = 2
+ALIEN_A_POINTS = 3
 ALIEN_B_POINTS = 4
-ALIEN_C_POINTS = 8
+ALIEN_C_POINTS = 5
 
 # Asteroid constants
 ASTEROID_SPEED_RANGE = 0.4
 ASTEROID_S_SPEED = 1.1
 ASTEROID_M_SPEED = 1.0
 ASTEROID_L_SPEED = 0.9
-ASTEROID_MAX_ROTATE_ANGLE = 5.5
-NUM_PIECES = 3 # Number of broken asteroid pieces M and L split into
+ASTEROID_MAX_ROTATE_ANGLE = 4.3
+NUM_PIECES = 2, 3 # Number of broken asteroid pieces M and L split into
 ASTEROID_POINTS = 1
 
 class Obstacle(pg.sprite.Sprite):
@@ -364,7 +364,8 @@ class AsteroidM(Asteroid):
         self.speed = random.uniform(ASTEROID_M_SPEED - ASTEROID_SPEED_RANGE, ASTEROID_M_SPEED + ASTEROID_SPEED_RANGE)
         
     def kill(self, laser_angle):
-        for _ in range(NUM_PIECES):
+        num_pieces = random.randint(NUM_PIECES[0], NUM_PIECES[1])
+        for _ in range(num_pieces):
             piece = AsteroidS(self.groups())
             piece.pos = geometry.Position(self.pos.x, self.pos.y)
             piece.angle = random.uniform(laser_angle - math.pi/2, laser_angle + math.pi/2)
@@ -378,7 +379,8 @@ class AsteroidL(Asteroid):
         self.speed = random.uniform(ASTEROID_L_SPEED - ASTEROID_SPEED_RANGE, ASTEROID_M_SPEED + ASTEROID_SPEED_RANGE)
         
     def kill(self, laser_angle):
-        for _ in range(NUM_PIECES):
+        num_pieces = random.randint(NUM_PIECES[0], NUM_PIECES[1])
+        for _ in range(num_pieces):
             piece = AsteroidM(self.groups())
             piece.pos = geometry.Position(self.pos.x, self.pos.y)
             piece.angle = random.uniform(laser_angle - math.pi/2, laser_angle + math.pi/2)
