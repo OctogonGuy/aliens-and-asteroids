@@ -57,6 +57,7 @@ class Obstacle(pg.sprite.Sprite):
         
         self.image = self.images[0]
         self.rect = self.image.get_rect(center=self.pos.xy())
+        self.mask = pg.mask.from_surface(self.image)
         
     def move_to_opposite_side(self):
         """Moves the obstacle to the opposite side of the screen if out of bounds."""
@@ -129,6 +130,7 @@ class AlienA(Alien):
         # Rotate image in the direction of movement
         self.image = pg.transform.rotate(self.images[self.image_index], self.descend_direction.angle() + 90)
         self.rect = self.image.get_rect(center=self.rect.center)
+        self.mask = pg.mask.from_surface(self.image)
         
     def move(self):
         # If alien has to descend, descend
@@ -241,6 +243,7 @@ class AlienB(Alien):
         # Rotate image in the direction of movement
         self.image = pg.transform.rotate(self.images[self.image_index], -angle - 90)
         self.rect = self.image.get_rect(center=self.rect.center)
+        self.mask = pg.mask.from_surface(self.image)
     
     def new_target(self):
         """Determines a new position to which to move."""
@@ -289,6 +292,7 @@ class AlienC(Alien):
         # Rotate image in the direction of movement
         self.image = pg.transform.rotate(self.images[self.image_index], -math.degrees(angle) - 90)
         self.rect = self.image.get_rect(center=self.rect.center)
+        self.mask = pg.mask.from_surface(self.image)
         
 
 class Asteroid(Obstacle):
@@ -345,6 +349,7 @@ class Asteroid(Obstacle):
         # Rotate
         self.rotation += self.rotation_amt
         self.image = pg.transform.rotate(self.images[self.image_index], self.rotation)
+        self.mask = pg.mask.from_surface(self.image)
         
         # Position the asteroid's rectangle on the screen
         self.rect = self.image.get_rect(center=self.pos.xy())

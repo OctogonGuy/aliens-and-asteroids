@@ -19,7 +19,7 @@ FPS = 60
 AMMO_CAP = 3
 RELOAD_RATE = 1 #s
 OBSTACLE_ANIMATION_RATE = 0.5 #s
-EXHAUST_ANIMATION_RATE = 0.67 #s
+EXHAUST_ANIMATION_RATE = 0.15 #s
 OBSTACLE_CHOICE_WEIGHTS = { # Weighted likelihood of obstacles being chosen
     obstacle.AlienA: 3,
     obstacle.AlienB: 2,
@@ -42,7 +42,7 @@ SPAWN_RATE_LIMIT = 1        # Spawn rate will approach but not reach this value
 
 def new_game():
     """Starts a new game."""
-    global aliens, asteroids, lasers, sprites, playergroup, player, \
+    global obstacles, aliens, asteroids, lasers, sprites, playergroup, player, \
         ammo, spawn_time_left, reload_time_left, reloading, score, \
         spawn_rate, start_time
     
@@ -57,6 +57,7 @@ def new_game():
     spawn_rate = FIRST_SPAWN_TIME
     
     # Initialize game groups
+    obstacles = pg.sprite.Group()
     aliens = pg.sprite.Group()
     asteroids = pg.sprite.Group()
     lasers = pg.sprite.Group()
@@ -182,11 +183,11 @@ def main():
             if spawn_time_left <= 0:
                 clazz = random.choice(obstacle_choices)
                 if issubclass(clazz, obstacle.AlienC):
-                    clazz(player, sprites, aliens)
+                    clazz(player, sprites, obstacles, aliens)
                 elif issubclass(clazz, obstacle.Alien):
-                    clazz(sprites, aliens)
+                    clazz(sprites, obstacles, aliens)
                 else:
-                    clazz(sprites, asteroids)
+                    clazz(sprites, obstacles, asteroids)
                     
                 update_spawn_rate()
                 spawn_time_left = spawn_rate
@@ -212,25 +213,26 @@ def main():
             
             # Detect collisions between aliens/asteroids and player
             # If collision is detected, kill player
-            for _ in pg.sprite.groupcollide(aliens, playergroup, False, True):
-                spaceship_kill_sound.play()
-            for _ in pg.sprite.groupcollide(asteroids, playergroup, False, True):
-                spaceship_kill_sound.play()
+            if pg.sprite.groupcollide(obstacles, playergroup, False, False) \
+            and pg.sprite.groupcollide(obstacles, playergroup, False, True, pg.sprite.collide_mask):
+                    spaceship_kill_sound.play()
             
             # Detect collisions between aliens/asteroids and laser
             # If collision is detected, kill obstacle and remove laser
-            for alien in pg.sprite.groupcollide(aliens, lasers, True, True):
-                alien_kill_sound.play()
-                score += alien.points
-            for asteroid, laser_list in pg.sprite.groupcollide(asteroids, lasers, False, False).items():
-                laser = laser_list[0]
-                if issubclass(asteroid.__class__, obstacle.AsteroidM) or issubclass(asteroid.__class__, obstacle.AsteroidL):
-                    asteroid.kill(laser.angle)
-                else:
-                    asteroid.kill()
-                laser.kill()
-                asteroid_kill_sound.play()
-                score += asteroid.points
+            if pg.sprite.groupcollide(obstacles, lasers, False, False) \
+            and pg.sprite.groupcollide(obstacles, lasers, False, False, pg.sprite.collide_mask):
+                for alien in pg.sprite.groupcollide(aliens, lasers, True, True):
+                    alien_kill_sound.play()
+                    score += alien.points
+                for asteroid, laser_list in pg.sprite.groupcollide(asteroids, lasers, False, False, pg.sprite.collide_mask).items():
+                    laser = laser_list[0]
+                    if issubclass(asteroid.__class__, obstacle.AsteroidM) or issubclass(asteroid.__class__, obstacle.AsteroidL):
+                        asteroid.kill(laser.angle)
+                    else:
+                        asteroid.kill()
+                    laser.kill()
+                    asteroid_kill_sound.play()
+                    score += asteroid.points
             
             # Count down the spawn timer
             spawn_time_left -= 1 / FPS

@@ -26,6 +26,7 @@ class Spaceship(pg.sprite.Sprite):
         self.images = [pg.transform.rotate(image, -90.0) for image in self.images]
         self.image = pg.transform.rotate(self.images[0], -self.velocity.direction)
         self.rect = self.image.get_rect(center=self.pos.xy())
+        self.mask = pg.mask.from_surface(self.image)
         
         self.exhaust = Exhaust(self, sprite_group)
         
@@ -49,6 +50,7 @@ class Spaceship(pg.sprite.Sprite):
         # Rotate the image
         self.image = pg.transform.rotate(self.images[0], -self.velocity.direction)
         self.rect = self.image.get_rect(center=self.rect.center)
+        self.mask = pg.mask.from_surface(self.image)
         
     def shoot(self, *groups):
         """Shoots a laser from the front of she spaceship."""
@@ -134,6 +136,7 @@ class Laser(pg.sprite.Sprite):
         self.images = [pg.transform.rotate(image, -90.0) for image in self.images]
         self.image = pg.transform.rotate(self.images[0], -spaceship.velocity.direction)
         self.rect = self.image.get_rect(center=self.pos.xy())
+        self.mask = pg.mask.from_surface(self.image)
         
     def update(self):
         """Moves the laser forward."""
